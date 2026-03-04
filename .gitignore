@@ -1,0 +1,40 @@
+# Documentation
+RFPRED_discussion.docx
+~$PRED_discussion.docx
+
+# Data files
+full_dataset.csv
+parafoveal_data_subj01.csv
+
+# Directories
+aws/
+aws-cli.zip
+aws.zip
+bin/
+data/
+envs/
+install_uv.sh
+local_plotting/
+logs/
+notebooks/
+rfpred_hpc/
+unet_recon/
+
+# local_plotting/
+# data/
+# logs/
+# rfpred_hpc/
+# envs/
+# aws/
+# notebooks/
+# bin/
+# unet_recon/
+
+# full_dataset.csv
+# parafoveal_data_subj01.csv
+# RFPRED_discussion.docx
+# aws.zip
+# aws-cli.zip
+# install_uv.sh
+
+
