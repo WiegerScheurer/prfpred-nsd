@@ -5,6 +5,7 @@ RFPRED_discussion.docx
 # Data files
 full_dataset.csv
 parafoveal_data_subj01.csv
+rfpred_config.json
 
 # Directories
 aws/
