@@ -2,6 +2,7 @@ import copy
 import os
 import sys
 from typing import Dict, List, Optional, Sequence, Tuple, Union
+import json
 import numpy as np
 from colorama import Fore, Style
 
@@ -125,6 +126,15 @@ class VoxelSieve:
         - cutoff (int): The maximum number of voxels to be included in the voxel selection. 
         """        
         roi_voxels = np.ones(np.sum(self.vox_pick)).astype(bool)
+    # Load codebase_home from config
+    def get_codebase_home():
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'rfpred_config.json')
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        return config.get('codebase_home', os.getcwd())
+
+    codebase_home = get_codebase_home()
+    os.chdir(codebase_home)
         r2raw_arr = self.nsd_R2[roi_voxels]
         
         # Adjust the mask based on the top n NSD R2 voxels, so cutoffs don't cut off good voxels

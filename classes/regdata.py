@@ -1,5 +1,9 @@
 
+
 import os
+import json
+import os
+import json
 import re
 import sys
 import math
@@ -14,7 +18,24 @@ import seaborn as sns
 from typing import Optional, List
 from matplotlib.colors import LinearSegmentedColormap
 from scipy.stats import zscore as zs
-os.chdir("/project/3018078.02/rfpred_dccn")
+
+# Load codebase_home from config
+def get_codebase_home():
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'rfpred_config.json')
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    return config.get('codebase_home', os.getcwd())
+
+codebase_home = get_codebase_home()
+os.chdir(codebase_home)
+def get_codebase_home():
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'rfpred_config.json')
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+    return config.get('codebase_home', os.getcwd())
+
+codebase_home = get_codebase_home()
+os.chdir(codebase_home)
 
 # sys.path.append('/Users/wiegerscheurer/miniconda3/envs/rfenv_minimal/')
 # sys.path.append('/Users/wiegerscheurer/Library/CloudStorage/OneDrive-RadboudUniversiteit/Donders/rfpred_local') #Otherwise it cannot find classes and such
