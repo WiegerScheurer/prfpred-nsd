@@ -599,13 +599,27 @@ def _get_peri_df(
 
 
 def _get_fovea_df(
-    subject: str, statistic: str = "delta_r", aggregate_layers: bool = True, mean_stats:bool = True
+    subject: str, 
+    statistic: str = "delta_r", 
+    aggregate_layers: bool = True, 
+    mean_stats:bool = True
 ):
+
+    '''This one plucks the data from the original .csv files
+    Note that this file is missing for subject 5, due to migration issues.
+    For this, I have the _get_fovea_df_local function,
+    which exists in the sumstats.ipynb file, but will move it here as well.
+    Find some time to fix that, because in that func I derive the stats
+    from nifti files, retrospectively, which works, but is annoying.'''
 
     if statistic == "delta_r_baseline":
         this_folder = "baseline"
         this_model = "gabor_pyr_sf4_dir4_allfilts"
         this_statistic = "delta_r"
+    elif statistic == "r_shuffle_baseline":
+        this_folder = "baseline"
+        this_model = "gabor_pyr_sf4_dir4_allfilts"
+        this_statistic = "R_alt_model"
     else:
         this_folder = f"unpred/vggfull_gabor_baseline_allfilts"
         this_statistic = statistic
@@ -780,6 +794,107 @@ def _get_fovea_df(
 #     plt.show()
 
 #     return long_df
+
+
+
+### TODO: make it work, now still exists in notebook format (with NSP and such)
+def _get_fovea_df_local(subj_no:int, statistic="delta_r", voxel_average:bool=True):
+    # GET THE FOVEAL DELTA R AND BASELINE R VALUES
+    
+
+    # sub_path = f"/Users/wiegerscheurer/Library/CloudStorage/OneDrive-RadboudUniversiteit/Donders/Projects/rfpred_local/data/custom_files/subj0{subj_no}/stat_volumes"
+    sub_path = f"{NSP.own_datapath}/subj0{subj_no}/stat_volumes"
+    mean_dr = nib.load(sub_path + "/unpredvggfull_gabor_baseline_allfilts_vggfull_delta_r.nii.gz").get_fdata()
+    # /Users/wiegerscheurer/Library/CloudStorage/OneDrive-RadboudUniversiteit/Donders/Projects/rfpred_local/data/custom_files/subj01/stat_volumes/unpredvggfull_gabor_baseline_allfilts_vggfull_delta_r.nii
+    # baseline_r = nib.load(sub_path + "/unpredvggfull_gabor_baseline_vggfull_R_alt_model.nii").get_fdata()
+    baseline_r = nib.load(sub_path + "/baseline_gabor_pyr_sf4_dir4_delta_r.nii.gz").get_fdata()
+
+    # betas
+    betas = nib.load(sub_path + f"/unpredvggfull_gabor_baseline_allfilts_vggfull_beta_unpred.nii.gz").get_fdata()
+
+    fov_voxels = nib.load(sub_path + "/voxelselection.nii.gz").get_fdata()
+
+    mean_dr_coords = NSP.utils.numpy2coords(mean_dr, keep_vals=True)
+    baseline_r_coords = NSP.utils.numpy2coords(baseline_r, keep_vals=True)
+    fov_voxels_coords = NSP.utils.numpy2coords(fov_voxels, keep_vals=True)
+
+
+    # Initialize lists to store the results
+    delta_r_data = []
+    baseline_r_data = []
+    betas_data = []
+
+    for roi_no in range(1, 5):
+        # mean_dr_roi_specific = NSP.utils.roi_filter(rois[1][f"subj0{subj_no}"][f"V{roi_no}_mask"], mean_dr, nan2null=False)
+        mean_dr_roi_specific = NSP.utils.roi_filter(roi_masks[f"subj0{subj_no}"][f"V{roi_no}"], mean_dr, nan2null=False)
+        mean_dr_v4_clean = NSP.utils.find_common_rows(mean_dr_roi_specific, fov_voxels_coords, keep_vals=True)
+        mean_value = np.mean(mean_dr_v4_clean[:, 3]) if voxel_average else mean_dr_v4_clean[:, 3]
+        
+        # Append the results to the list
+        delta_r_data.append([f"V{roi_no}", mean_value])
+        
+    
+    for roi_no in range(1, 5):
+        # baseline_r_roi_specific = NSP.utils.roi_filter(rois[1][f"subj0{subj_no}"][f"V{roi_no}_mask"], baseline_r, nan2null=False)
+        baseline_r_roi_specific = NSP.utils.roi_filter(roi_masks[f"subj0{subj_no}"][f"V{roi_no}"], baseline_r, nan2null=False)
+        baseline_r_v4_clean = NSP.utils.find_common_rows(baseline_r_roi_specific, fov_voxels_coords, keep_vals=True)
+        mean_value = np.mean(baseline_r_v4_clean[:, 3]) if voxel_average else baseline_r_v4_clean[:, 3]
+        
+        # Append the results to the list
+        baseline_r_data.append([f"V{roi_no}", mean_value])
+
+    for roi_no in range(1, 5):
+        betas_roi_specific = NSP.utils.roi_filter(roi_masks[f"subj0{subj_no}"][f"V{roi_no}"], betas, nan2null=False)
+        betas_v4_clean = NSP.utils.find_common_rows(betas_roi_specific, fov_voxels_coords, keep_vals=True)
+        mean_value = np.mean(betas_v4_clean[:, 3]) if voxel_average else betas_v4_clean[:, 3]
+        
+        # Append the results to the list
+        betas_data.append([f"V{roi_no}", mean_value])
+        
+        
+
+    # Create DataFrames from the lists and set "roi" as the index
+    delta_r_df = pd.DataFrame(delta_r_data, columns=["roi", ""]).set_index("roi")
+    baseline_r_df = pd.DataFrame(baseline_r_data, columns=["roi", ""]).set_index("roi")
+    betas_df = pd.DataFrame(betas_data, columns=["roi", ""]).set_index("roi")
+
+    if statistic == "delta_r":
+        if voxel_average:
+            return delta_r_df.squeeze()
+        else:
+            stacked_df = pd.DataFrame(columns=["roi", "delta_r"])
+            crammed_df = delta_r_df.squeeze()
+            for roi in rois:
+                zaza = pd.DataFrame({"roi": [roi]*len(crammed_df[roi]), "delta_r": crammed_df[roi]})
+                stacked_df = pd.concat([stacked_df, zaza], ignore_index=True)
+            return stacked_df
+    elif statistic == "baseline_r":
+        if voxel_average:
+            return baseline_r_df.squeeze()
+        else:
+            stacked_df = pd.DataFrame(columns=["roi", "baseline_r"])
+            crammed_df = baseline_r_df.squeeze()
+            for roi in rois:
+                zaza = pd.DataFrame({"roi": [roi]*len(crammed_df[roi]), "baseline_r": crammed_df[roi]})
+                stacked_df = pd.concat([stacked_df, zaza], ignore_index=True)
+            return stacked_df
+    elif statistic == "beta_unpred":
+        if voxel_average:
+            return betas_df.squeeze()
+        else:
+            stacked_df = pd.DataFrame(columns=["roi", "beta_unpred"])
+            crammed_df = betas_df.squeeze()
+            for roi in rois:
+                zaza = pd.DataFrame({"roi": [roi]*len(crammed_df[roi]), "beta_unpred": crammed_df[roi]})
+                stacked_df = pd.concat([stacked_df, zaza], ignore_index=True)
+            return stacked_df
+    elif statistic == "r_wrt_baseline":
+        return (delta_r_df.squeeze() / baseline_r_df.squeeze()) * 100
+    else:
+        raise ValueError("Invalid statistic. Choose either 'delta_r' or 'baseline_r'")
+    
+
+
 
 def fovperi_per_lay(
     subject: str,
@@ -1321,3 +1436,7 @@ def plot_roi_histograms(
             plt.suptitle(f"{regname}", fontsize=16)
             plt.tight_layout()
             plt.show()
+
+
+
+

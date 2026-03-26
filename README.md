@@ -1,9 +1,20 @@
 # A hierarchy of spatial predictions across human visual cortex during natural vision
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19233920.svg)](https://doi.org/10.5281/zenodo.19233920)
+
 ### Repo Structure
 The repository currently contains three main folders:
 
 - *classes*: Contains class definitions used throughout the project.
+    - Analysis: core functionality for analyses
+    - Cortex: methods to work with neural data
+    - Datafetch: tools for fetching any type of data
+    - Explorations: functions for exploration
+    - Regdata: regression-related functionality
+    - Stimuli: tools to work with the natural scene stimuli
+    - Utilities: general utilitiy functions
+    - Voxelsieve: methods for voxel selection
+    - Natspatpred: houses the parent class that has other classes as attribute
 - *funcs*: Houses reusable functions for data processing and analysis.
 - *scripts*: Includes scripts for running experiments, analyses, and generating results.
 

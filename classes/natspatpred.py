@@ -1,4 +1,3 @@
-os.chdir("/project/3018078.02/rfpred_dccn")
 
 import os
 import json

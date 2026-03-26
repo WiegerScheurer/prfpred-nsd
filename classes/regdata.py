@@ -2,7 +2,6 @@
 
 import os
 import json
-import os
 import json
 import re
 import sys
@@ -92,41 +91,6 @@ class RegData:
         single_file = self.single_file
         exclude_columns = self.exclude_columns
 
-# class RegData:
-#     def __init__(
-#         self,
-#         subject: str = "subj01",
-#         folder: str | None = "unpred",
-#         model: str = "vgg-b",
-#         statistic: str = "delta_r",  # delta_r, R_alt_model, or R
-#         verbose: bool = False,
-#         skip_norm_lay: bool = False,
-#         single_file: bool = False,
-#         exclude_columns: list = None,
-#     ):
-#         self.subject = subject
-#         self.folder = folder
-#         self.model = model
-#         self.statistic = statistic
-#         self.cnn_layers = None
-#         self.verbose = verbose
-#         self.skip_norm_lay = skip_norm_lay
-#         self.single_file = single_file
-#         self._build_df(subject, folder, model, statistic, verbose=verbose, skip_norm_lay=skip_norm_lay, single_file=single_file)
-
-#     def _build_df(
-#         self,
-#         subject: str,
-#         folder: str,
-#         model: str,
-#         statistic: str,
-#         main_df: bool = True,
-#         add_xyz: bool = True,
-#         verbose: bool = True,
-#         skip_norm_lay: bool = False,
-#         single_file: bool = False,
-#         exclude_columns: list = None,
-#     ):
         # Directory containing the CSV files
         directory = f"{NSP.own_datapath}/{subject}/results/{folder}/"
 
@@ -151,10 +115,7 @@ class RegData:
                 most_sparse_file = True
             
             # Check if the filename starts with the model name
-            # if filename.startswith(model) and filename.endswith(".csv") and relevant_layer:
             if filename.startswith(model) and filename.endswith(".csv") and relevant_layer and most_sparse_file:
-
-                # layno = NSP.utils.get_layer_file(filename, "lay") if self.folder == "unpred" else fileno
 
                 if verbose:
                     print(f"Processing file {filename} for layer {layno+1}")
@@ -527,18 +488,6 @@ class RegData:
             )
             for i, layer in enumerate(self.cnn_layers)
         ]
-        # if legend:
-        #     # Create legend
-        #     legend = plt.legend(
-        #         handles=leg_colours,
-        #         title="CNN\nLayer",
-        #         loc="center right",
-        #         bbox_to_anchor=(1.15, 0.5),
-        #         ncol=1,
-        #         fancybox=False,
-        #         shadow=False,
-        #         fontsize=10,
-        #     )
 
         if legend:
             # Reverse the order of legend handles to flip the legend
@@ -568,13 +517,14 @@ class RegData:
                 save_at = f"{NSP.own_datapath}/{self.subject}/results/{self.folder}/layassign/"
             else:
                 save_at = save_at # os.path.join(save_at, f"{self.model}_{self.statistic}_mean_lines.png")
-                # save_at = os.path.join(save_at, f"{self.model}_{self.statistic}_{max_or_weighted}_mean_lines.png")
             fig = plt.gcf()
             if not os.path.exists(os.path.dirname(save_at)):
                 os.makedirs(os.path.dirname(save_at))
             # Save the figure
             fig.savefig(os.path.join(save_at, f"{self.model}_{self.statistic}_layer_assignment.png"), bbox_inches="tight", dpi=300)
         plt.show()
+
+        return df
 
     def mean_lines(
         self,
@@ -625,7 +575,6 @@ class RegData:
 
         # Reshape the DataFrame
         df_melted = df.melt(
-            # id_vars=present_id_vars, var_name="column", value_name="delta_r"
             id_vars=present_id_vars,
             var_name="column",
             value_name=self.statistic,
@@ -739,14 +688,11 @@ class RegData:
             (catplot.ax if plot_catplot else ax).set_title(title)
 
         plt.show()
-        
-        # if save_as is not None:
-        #     fig.savefig(save_as)
+
 
     def _delta_r_lines(self, cmap: str = "Reds"):
         """
         Method to plot the delta_r values for each voxel in each ROI across the layers of the CNN model.
-        TODO: MAKE COMPATIBLE WITH THE FULL VGG MODEL OF 13 LAYERS, THE INDICES ARE MESSED UP (not true, it was correct all along)
         """
 
         model_str = "VGG-b" if self.model == "vgg-b" else "AlexNet"

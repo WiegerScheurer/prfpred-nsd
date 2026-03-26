@@ -391,7 +391,7 @@ class Stimuli:
         return_imfovs: bool = True,
         imfov_overlay: bool = False,
         config_path: str | None = None,
-        lgn_instance: LGN | None = None,
+        lgn_instance: None = None,
         patch_center: tuple | None = None,
         deg_per_pixel: float | None = None,
     ):
@@ -519,7 +519,7 @@ class Stimuli:
         return_imfovs: bool = False,
         imfov_overlay: bool = False,
         config_path: str | None = None,
-        lgn_instance: LGN | None = None,
+        lgn_instance: None = None,
     ):
         """
         Compute Spatial Coherence and Contrast Energy for a single image.
