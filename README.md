@@ -1,4 +1,4 @@
-# A hierarchy of spatial predictions across human visual cortex during natural vision
+# Distinct spatial prediction regimes across the visual field during natural vision
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19233920.svg)](https://doi.org/10.5281/zenodo.19233920)
 
